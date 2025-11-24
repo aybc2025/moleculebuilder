@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="style.css" />
-  <meta name="theme-color" content="#0f172a" />
+  <meta name="theme-color" content="#f3f4f6" />
 </head>
 <body>
   <div id="app" class="app fade-in">
@@ -61,7 +61,8 @@
                 <span>לחצו על אטום אחד ואז על אחר כדי ליצור קשר.</span>
               </div>
               <div class="board" id="board">
-                <svg class="bond-layer" id="bond-layer"></svg>
+                <!-- שימו לב ל-width / height -->
+                <svg class="bond-layer" id="bond-layer" width="100%" height="100%"></svg>
                 <!-- האטומים (div) יתווספו כאן דינאמית -->
               </div>
             </div>
@@ -77,7 +78,7 @@
           </div>
         </section>
 
-        <!-- מסך אתגרים (V1: בסיס, אפשר להרחיב בהמשך) -->
+        <!-- מסך אתגרים (בינתיים בסיסי) -->
         <section id="screen-challenges" class="screen">
           <div class="screen-header">
             <h2>אתגרי בנייה</h2>
@@ -108,10 +109,9 @@
 
   <script src="app.js"></script>
   <script>
-    // רישום Service Worker ל-PWA
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js').catch(() => {});
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js").catch(() => {});
       });
     }
   </script>
