@@ -823,13 +823,18 @@ function getAtomsBySymbol(symbol) {
 
 function setupDemoBondsForMolecule(mol) {
   bonds = [];
+
+  const Hs = getAtomsBySymbol("H");
+  const Os = getAtomsBySymbol("O");
+  const Cs = getAtomsBySymbol("C");
+  const Ns = getAtomsBySymbol("N");
+
   switch (mol.id) {
+    // מים H2O
     case "water": {
-      const oAtoms = getAtomsBySymbol("O");
-      const hAtoms = getAtomsBySymbol("H");
-      if (oAtoms.length === 1 && hAtoms.length === 2) {
-        const O = oAtoms[0];
-        const [H1, H2] = hAtoms;
+      if (Os.length === 1 && Hs.length === 2) {
+        const O = Os[0];
+        const [H1, H2] = Hs;
         bonds.push(
           { id: "b" + bondIdCounter++, aId: O.id, bId: H1.id, order: 1 },
           { id: "b" + bondIdCounter++, aId: O.id, bId: H2.id, order: 1 }
@@ -837,24 +842,52 @@ function setupDemoBondsForMolecule(mol) {
       }
       break;
     }
+
+    // חמצן נשימתי O2
     case "oxygen": {
-      const oAtoms = getAtomsBySymbol("O");
-      if (oAtoms.length === 2) {
+      if (Os.length === 2) {
         bonds.push({
           id: "b" + bondIdCounter++,
-          aId: oAtoms[0].id,
-          bId: oAtoms[1].id,
-          order: 2,
+          aId: Os[0].id,
+          bId: Os[1].id,
+          order: 2
         });
       }
       break;
     }
+
+    // מימן גזי H2
+    case "hydrogen-gas": {
+      if (Hs.length === 2) {
+        bonds.push({
+          id: "b" + bondIdCounter++,
+          aId: Hs[0].id,
+          bId: Hs[1].id,
+          order: 1
+        });
+      }
+      break;
+    }
+
+    // מי חמצן H2O2 : H–O–O–H
+    case "hydrogen-peroxide": {
+      if (Hs.length === 2 && Os.length === 2) {
+        const [H1, H2] = Hs;
+        const [O1, O2] = Os;
+        bonds.push(
+          { id: "b" + bondIdCounter++, aId: H1.id, bId: O1.id, order: 1 },
+          { id: "b" + bondIdCounter++, aId: O1.id, bId: O2.id, order: 1 },
+          { id: "b" + bondIdCounter++, aId: O2.id, bId: H2.id, order: 1 }
+        );
+      }
+      break;
+    }
+
+    // פחמן דו־חמצני CO2 : O=C=O (שני קשרים כפולים)
     case "carbon-dioxide": {
-      const cAtoms = getAtomsBySymbol("C");
-      const oAtoms = getAtomsBySymbol("O");
-      if (cAtoms.length === 1 && oAtoms.length === 2) {
-        const C = cAtoms[0];
-        const [O1, O2] = oAtoms;
+      if (Cs.length === 1 && Os.length === 2) {
+        const C = Cs[0];
+        const [O1, O2] = Os;
         bonds.push(
           { id: "b" + bondIdCounter++, aId: C.id, bId: O1.id, order: 2 },
           { id: "b" + bondIdCounter++, aId: C.id, bId: O2.id, order: 2 }
@@ -862,38 +895,125 @@ function setupDemoBondsForMolecule(mol) {
       }
       break;
     }
+
+    // מתאן CH4
     case "methane": {
-      const cAtoms = getAtomsBySymbol("C");
-      const hAtoms = getAtomsBySymbol("H");
-      if (cAtoms.length === 1 && hAtoms.length === 4) {
-        const C = cAtoms[0];
-        hAtoms.forEach((H) => {
+      if (Cs.length === 1 && Hs.length === 4) {
+        const C = Cs[0];
+        Hs.forEach((H) => {
           bonds.push({
             id: "b" + bondIdCounter++,
             aId: C.id,
             bId: H.id,
-            order: 1,
+            order: 1
           });
         });
       }
       break;
     }
+
+    // אמוניה NH3
     case "ammonia": {
-      const nAtoms = getAtomsBySymbol("N");
-      const hAtoms = getAtomsBySymbol("H");
-      if (nAtoms.length === 1 && hAtoms.length === 3) {
-        const N = nAtoms[0];
-        hAtoms.forEach((H) => {
+      if (Ns.length === 1 && Hs.length === 3) {
+        const N = Ns[0];
+        Hs.forEach((H) => {
           bonds.push({
             id: "b" + bondIdCounter++,
             aId: N.id,
             bId: H.id,
-            order: 1,
+            order: 1
           });
         });
       }
       break;
     }
+
+    // פורמלדהיד CH2O : C מחובר לשני H ולקשר כפול ל-O
+    case "formaldehyde": {
+      if (Cs.length === 1 && Hs.length === 2 && Os.length === 1) {
+        const C = Cs[0];
+        const [H1, H2] = Hs;
+        const O = Os[0];
+        bonds.push(
+          { id: "b" + bondIdCounter++, aId: C.id, bId: H1.id, order: 1 },
+          { id: "b" + bondIdCounter++, aId: C.id, bId: H2.id, order: 1 },
+          { id: "b" + bondIdCounter++, aId: C.id, bId: O.id, order: 2 }
+        );
+      }
+      break;
+    }
+
+    // אתאן C2H6 : שני פחמנים מחוברים, וכל אחד ל-3 H
+    case "ethane": {
+      if (Cs.length === 2 && Hs.length === 6) {
+        const [C1, C2] = Cs;
+        const [H1, H2, H3, H4, H5, H6] = Hs;
+
+        // קשר בין C1 ל-C2
+        bonds.push({
+          id: "b" + bondIdCounter++,
+          aId: C1.id,
+          bId: C2.id,
+          order: 1
+        });
+
+        // שלושה H על כל פחמן
+        [H1, H2, H3].forEach((H) => {
+          bonds.push({
+            id: "b" + bondIdCounter++,
+            aId: C1.id,
+            bId: H.id,
+            order: 1
+          });
+        });
+        [H4, H5, H6].forEach((H) => {
+          bonds.push({
+            id: "b" + bondIdCounter++,
+            aId: C2.id,
+            bId: H.id,
+            order: 1
+          });
+        });
+      }
+      break;
+    }
+
+    // מתנול CH3OH : C–(3H)–O–H
+    case "methanol": {
+      if (Cs.length === 1 && Os.length === 1 && Hs.length === 4) {
+        const C = Cs[0];
+        const O = Os[0];
+        const [H1, H2, H3, H4] = Hs;
+
+        // שלושת המימנים של הפחמן
+        [H1, H2, H3].forEach((H) => {
+          bonds.push({
+            id: "b" + bondIdCounter++,
+            aId: C.id,
+            bId: H.id,
+            order: 1
+          });
+        });
+
+        // קשר C–O
+        bonds.push({
+          id: "b" + bondIdCounter++,
+          aId: C.id,
+          bId: O.id,
+          order: 1
+        });
+
+        // קשר O–H
+        bonds.push({
+          id: "b" + bondIdCounter++,
+          aId: O.id,
+          bId: H4.id,
+          order: 1
+        });
+      }
+      break;
+    }
+
     default:
       break;
   }
@@ -902,95 +1022,6 @@ function setupDemoBondsForMolecule(mol) {
 // ===== פריסת אטומים במבנה דומה למציאות =====
 
 function applyMoleculeLayout(mol) {
-  const rect = boardEl.getBoundingClientRect();
-  const width = rect.width || boardEl.clientWidth || 400;
-  const height = rect.height || boardEl.clientHeight || 260;
-  const cx = width / 2;
-  const cy = height / 2;
-
-  const getAtoms = (symbol) => atomsOnBoard.filter((a) => a.symbol === symbol);
-
-  switch (mol.id) {
-    case "water": {
-      const oAtoms = getAtoms("O");
-      const hAtoms = getAtoms("H");
-      if (oAtoms.length === 1 && hAtoms.length === 2) {
-        const O = oAtoms[0];
-        const [H1, H2] = hAtoms;
-        O.x = cx;
-        O.y = cy - 40;
-        H1.x = cx - 60;
-        H1.y = cy + 40;
-        H2.x = cx + 60;
-        H2.y = cy + 40;
-      }
-      break;
-    }
-    case "oxygen": {
-      const oAtoms = getAtoms("O");
-      if (oAtoms.length === 2) {
-        oAtoms[0].x = cx - 60;
-        oAtoms[0].y = cy;
-        oAtoms[1].x = cx + 60;
-        oAtoms[1].y = cy;
-      }
-      break;
-    }
-    case "carbon-dioxide": {
-      const cAtoms = getAtoms("C");
-      const oAtoms = getAtoms("O");
-      if (cAtoms.length === 1 && oAtoms.length === 2) {
-        const C = cAtoms[0];
-        const [O1, O2] = oAtoms;
-        C.x = cx;
-        C.y = cy;
-        O1.x = cx - 90;
-        O1.y = cy;
-        O2.x = cx + 90;
-        O2.y = cy;
-      }
-      break;
-    }
-    case "methane": {
-      const cAtoms = getAtoms("C");
-      const hAtoms = getAtoms("H");
-      if (cAtoms.length === 1 && hAtoms.length === 4) {
-        const C = cAtoms[0];
-        C.x = cx;
-        C.y = cy;
-        const r = 80;
-        hAtoms[0].x = cx;
-        hAtoms[0].y = cy - r;
-        hAtoms[1].x = cx;
-        hAtoms[1].y = cy + r;
-        hAtoms[2].x = cx - r;
-        hAtoms[2].y = cy;
-        hAtoms[3].x = cx + r;
-        hAtoms[3].y = cy;
-      }
-      break;
-    }
-    case "ammonia": {
-      const nAtoms = getAtoms("N");
-      const hAtoms = getAtoms("H");
-      if (nAtoms.length === 1 && hAtoms.length === 3) {
-        const N = nAtoms[0];
-        const [H1, H2, H3] = hAtoms;
-        N.x = cx;
-        N.y = cy - 40;
-        H1.x = cx - 60;
-        H1.y = cy + 40;
-        H2.x = cx + 60;
-        H2.y = cy + 40;
-        H3.x = cx;
-        H3.y = cy + 90;
-      }
-      break;
-    }
-    default:
-      break;
-  }
-}
 
 function showMoleculeInfo(mol) {
   moleculeInfoEl.classList.remove("hidden");
