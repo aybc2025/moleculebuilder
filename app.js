@@ -256,7 +256,6 @@ function buildChallengeList() {
 
     titleBox.appendChild(title);
     titleBox.appendChild(formula);
-
     header.appendChild(titleBox);
 
     const desc = document.createElement("div");
@@ -271,8 +270,12 @@ function buildChallengeList() {
     showBtn.className = "secondary-btn";
     showBtn.textContent = "הצג מולקולה";
     showBtn.addEventListener("click", () => {
-      showMoleculeSample(mol);
+      // קודם מעבירים למסך המשחק החופשי
       switchScreen("screen-freeplay");
+      // ואז בפריים הבא מחשבים פריסה – הלוח כבר גלוי ויש לו רוחב/גובה
+      requestAnimationFrame(() => {
+        showMoleculeSample(mol);
+      });
     });
 
     const startBtn = document.createElement("button");
@@ -280,8 +283,8 @@ function buildChallengeList() {
     startBtn.className = "primary-btn";
     startBtn.textContent = "התחל אתגר";
     startBtn.addEventListener("click", () => {
-      startChallenge(mol);
       switchScreen("screen-freeplay");
+      startChallenge(mol);
     });
 
     actions.appendChild(showBtn);
@@ -741,30 +744,23 @@ function findMatchingMolecule(counts) {
 // ===== הצגת מולקולה מוכנה (לדרישת הילד) =====
 
 function showMoleculeSample(mol) {
-  const rect = boardEl.getBoundingClientRect();
-  const cx = rect.width / 2;
-  const cy = rect.height / 2;
-
   atomsOnBoard = [];
   bonds = [];
   selectedAtomId = null;
 
-  // יצירת אטומים לפי הספירה
+  // יוצרים אטומים בלי תלות במיקום – המיקום יקבע ב-applyMoleculeLayout
   Object.entries(mol.atomCounts).forEach(([symbol, count]) => {
     for (let i = 0; i < count; i++) {
       atomsOnBoard.push({
         id: "a" + atomIdCounter++,
         symbol,
-        x: cx,
-        y: cy,
+        x: 0,
+        y: 0,
       });
     }
   });
 
-  // יצירת קשרים מתאימים לדוגמה
   setupDemoBondsForMolecule(mol);
-
-  // פריסת מיקומים
   applyMoleculeLayout(mol);
   renderBoard();
   showMoleculeInfo(mol);
@@ -857,8 +853,10 @@ function setupDemoBondsForMolecule(mol) {
 
 function applyMoleculeLayout(mol) {
   const rect = boardEl.getBoundingClientRect();
-  const cx = rect.width / 2;
-  const cy = rect.height / 2;
+  const width = rect.width || boardEl.clientWidth || 400;
+  const height = rect.height || boardEl.clientHeight || 260;
+  const cx = width / 2;
+  const cy = height / 2;
 
   const getAtoms = (symbol) => atomsOnBoard.filter((a) => a.symbol === symbol);
 
