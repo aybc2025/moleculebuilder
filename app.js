@@ -81,10 +81,19 @@ const ATOM_MAP = ATOM_DEFS.reduce((map, atom) => {
 // ===== מצב המשחק =====
 
 let atomsOnBoard = []; // [{id, symbol, x, y}]
-let bonds = []; // [{id, aId, bId}]
+let bonds = []; // [{id, aId, bId, order}]
 let atomIdCounter = 1;
 let bondIdCounter = 1;
 let selectedAtomId = null;
+
+// מצב גרירה
+let dragState = {
+  atomId: null,
+  offsetX: 0,
+  offsetY: 0,
+  moved: false,
+};
+let suppressNextClick = false;
 
 // אלמנטים
 
@@ -282,7 +291,7 @@ function renderBoard() {
 
     const extraSpan = document.createElement("span");
     extraSpan.className = "atom-node-small";
-    const usedBonds = getBondCount(atom.id);
+    const usedBonds = getBondOrderSum(atom.id);
     extraSpan.textContent = `${usedBonds}/${atomDef.maxBonds} ידיים`;
 
     node.appendChild(symbolSpan);
@@ -291,34 +300,112 @@ function renderBoard() {
     node.style.left = `${atom.x - 26}px`;
     node.style.top = `${atom.y - 26}px`;
 
+    // קליק לבחירה/יצירת קשר
     node.addEventListener("click", (e) => {
       e.stopPropagation();
+      if (suppressNextClick) {
+        suppressNextClick = false;
+        return;
+      }
       handleAtomClick(atom.id);
+    });
+
+    // גרירה – pointer events
+    node.addEventListener("pointerdown", (e) => {
+      e.stopPropagation();
+      const rect = boardEl.getBoundingClientRect();
+      const pointerX = e.clientX - rect.left;
+      const pointerY = e.clientY - rect.top;
+      dragState.atomId = atom.id;
+      dragState.offsetX = atom.x - pointerX;
+      dragState.offsetY = atom.y - pointerY;
+      dragState.moved = false;
+      node.setPointerCapture(e.pointerId);
+    });
+
+    node.addEventListener("pointermove", (e) => {
+      if (dragState.atomId !== atom.id) return;
+      e.preventDefault();
+      const rect = boardEl.getBoundingClientRect();
+      const pointerX = e.clientX - rect.left;
+      const pointerY = e.clientY - rect.top;
+
+      let newX = pointerX + dragState.offsetX;
+      let newY = pointerY + dragState.offsetY;
+
+      // גבולות הלוח
+      const r = 26;
+      newX = Math.max(r, Math.min(rect.width - r, newX));
+      newY = Math.max(r, Math.min(rect.height - r, newY));
+
+      atom.x = newX;
+      atom.y = newY;
+      dragState.moved = true;
+
+      renderBoard();
+    });
+
+    node.addEventListener("pointerup", (e) => {
+      if (dragState.atomId === atom.id) {
+        node.releasePointerCapture(e.pointerId);
+        if (dragState.moved) {
+          suppressNextClick = true; // לא להפעיל קליק אחרי גרירה
+        }
+        dragState.atomId = null;
+      }
+    });
+
+    node.addEventListener("pointercancel", (e) => {
+      if (dragState.atomId === atom.id) {
+        node.releasePointerCapture(e.pointerId);
+        dragState.atomId = null;
+      }
     });
 
     boardEl.appendChild(node);
   });
 
-  // קשרים (קווים)
+  // קשרים (כולל קשר כפול)
   bonds.forEach((bond) => {
     const atomA = atomsOnBoard.find((a) => a.id === bond.aId);
     const atomB = atomsOnBoard.find((a) => a.id === bond.bId);
     if (!atomA || !atomB) return;
 
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", atomA.x);
-    line.setAttribute("y1", atomA.y);
-    line.setAttribute("x2", atomB.x);
-    line.setAttribute("y2", atomB.y);
-    line.setAttribute("stroke", "rgba(75,85,99,0.95)"); // אפור כהה על רקע בהיר
-    line.setAttribute("stroke-width", "3.2");
-    line.setAttribute("stroke-linecap", "round");
+    const { x: x1, y: y1 } = atomA;
+    const { x: x2, y: y2 } = atomB;
 
-    bondLayerEl.appendChild(line);
+    if (bond.order === 1) {
+      drawBondLine(x1, y1, x2, y2, 0);
+    } else if (bond.order === 2) {
+      // שני קווים מקבילים – קשר כפול
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const len = Math.max(Math.hypot(dx, dy), 1);
+      const nx = -dy / len;
+      const ny = dx / len;
+      const offset = 4;
+
+      drawBondLine(x1 + nx * offset, y1 + ny * offset, x2 + nx * offset, y2 + ny * offset, 0);
+      drawBondLine(x1 - nx * offset, y1 - ny * offset, x2 - nx * offset, y2 - ny * offset, 0);
+    }
   });
 
   updateSelectionVisual();
 }
+
+function drawBondLine(x1, y1, x2, y2) {
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line.setAttribute("x1", x1);
+  line.setAttribute("y1", y1);
+  line.setAttribute("x2", x2);
+  line.setAttribute("y2", y2);
+  line.setAttribute("stroke", "rgba(75,85,99,0.95)");
+  line.setAttribute("stroke-width", "3.2");
+  line.setAttribute("stroke-linecap", "round");
+  bondLayerEl.appendChild(line);
+}
+
+// ===== לוגיקת בחירה וחיבור =====
 
 function handleAtomClick(atomId) {
   if (!selectedAtomId) {
@@ -355,19 +442,15 @@ function updateSelectionVisual() {
   });
 }
 
+// כאן מתבצעת לוגיקת קשר יחיד / כפול:
+//  - אין קשר → ניצור קשר מסדר 1
+//  - יש קשר מסדר 1 → ננסה לשדרג לסדר 2 (אם יש "ידיים" פנויות)
+//  - יש קשר מסדר 2 → נסיר את הקשר
 function tryToggleBond(aId, bId) {
   const existing = bonds.find(
     (b) =>
       (b.aId === aId && b.bId === bId) || (b.aId === bId && b.bId === aId)
   );
-
-  if (existing) {
-    bonds = bonds.filter((b) => b !== existing);
-    selectedAtomId = null;
-    renderBoard();
-    showMessage("הסרנו את הקשר בין האטומים.", "neutral");
-    return;
-  }
 
   const atomA = atomsOnBoard.find((a) => a.id === aId);
   const atomB = atomsOnBoard.find((a) => a.id === bId);
@@ -376,33 +459,77 @@ function tryToggleBond(aId, bId) {
   const defA = ATOM_MAP[atomA.symbol];
   const defB = ATOM_MAP[atomB.symbol];
 
-  const usedA = getBondCount(aId);
-  const usedB = getBondCount(bId);
+  if (!existing) {
+    // קשר חדש מסדר 1
+    const usedA = getBondOrderSum(aId);
+    const usedB = getBondOrderSum(bId);
+    if (usedA >= defA.maxBonds || usedB >= defB.maxBonds) {
+      selectedAtomId = null;
+      flashAtomError([aId, bId]);
+      const overAtom = usedA >= defA.maxBonds ? defA : defB;
+      showMessage(
+        `לא ניתן לחבר. לאטום ${overAtom.name_he} כבר אין ידיים פנויות.`,
+        "error"
+      );
+      renderBoard();
+      return;
+    }
 
-  if (usedA >= defA.maxBonds || usedB >= defB.maxBonds) {
+    bonds.push({
+      id: "b" + bondIdCounter++,
+      aId,
+      bId,
+      order: 1,
+    });
     selectedAtomId = null;
-    flashAtomError([aId, bId]);
-    const overAtom = usedA >= defA.maxBonds ? defA : defB;
-    showMessage(
-      `לא ניתן לחבר. לאטום ${overAtom.name_he} כבר אין ידיים פנויות.`,
-      "error"
-    );
     renderBoard();
+    showMessage("יצרת קשר חדש בין שני האטומים.", "neutral");
     return;
   }
 
-  bonds.push({
-    id: "b" + bondIdCounter++,
-    aId,
-    bId,
-  });
-  selectedAtomId = null;
-  renderBoard();
-  showMessage("יצרת קשר חדש בין שני האטומים.", "neutral");
+  // יש כבר קשר קיים
+  if (existing.order === 1) {
+    // ניסיון לשדרג לקשר כפול
+    const usedA = getBondOrderSum(aId);
+    const usedB = getBondOrderSum(bId);
+
+    if (usedA + 1 > defA.maxBonds || usedB + 1 > defB.maxBonds) {
+      // אין מספיק "ידיים" לעוד קשר
+      selectedAtomId = null;
+      flashAtomError([aId, bId]);
+      const overAtom =
+        usedA + 1 > defA.maxBonds ? defA : defB;
+      showMessage(
+        `אי אפשר ליצור עוד קשר ביניהם. לאטום ${overAtom.name_he} לא נשארות מספיק ידיים לקשר כפול.`,
+        "error"
+      );
+      renderBoard();
+      return;
+    }
+
+    existing.order = 2;
+    selectedAtomId = null;
+    renderBoard();
+    showMessage("יצרת קשר כפול בין שני האטומים.", "neutral");
+  } else {
+    // order === 2 → מחיקה
+    bonds = bonds.filter((b) => b !== existing);
+    selectedAtomId = null;
+    renderBoard();
+    showMessage("הסרנו את הקשר בין האטומים.", "neutral");
+  }
 }
 
-function getBondCount(atomId) {
-  return bonds.filter((b) => b.aId === atomId || b.bId === atomId).length;
+// ===== עזרי קשרים =====
+
+// סכום סדרי הקשרים (למשל קשר כפול = 2)
+function getBondOrderSum(atomId) {
+  return bonds.reduce((sum, b) => {
+    if (b.aId === atomId || b.bId === atomId) {
+      return sum + (b.order || 1);
+    }
+    return sum;
+  }, 0);
 }
 
 function flashAtomError(atomIds) {
@@ -439,7 +566,7 @@ function checkCurrentMolecule() {
   // בדיקת ידיים
   for (const atom of atomsOnBoard) {
     const def = ATOM_MAP[atom.symbol];
-    const used = getBondCount(atom.id);
+    const used = getBondOrderSum(atom.id);
     if (used > def.maxBonds) {
       flashAtomError([atom.id]);
       showMessage(
@@ -460,7 +587,6 @@ function checkCurrentMolecule() {
   const match = findMatchingMolecule(counts);
 
   if (match) {
-    // פריסת אטומים בצורה שתדמה את המבנה
     applyMoleculeLayout(match);
     renderBoard();
 
@@ -529,7 +655,7 @@ function applyMoleculeLayout(mol) {
       break;
     }
     case "carbon-dioxide": {
-      // CO2 – קו ישר: O–C–O
+      // CO2 – קו ישר: O=C=O
       const cAtoms = getAtoms("C");
       const oAtoms = getAtoms("O");
       if (cAtoms.length === 1 && oAtoms.length === 2) {
@@ -583,7 +709,6 @@ function applyMoleculeLayout(mol) {
       break;
     }
     default:
-      // למולקולות אחרות בעתיד אפשר להוסיף כאן תבניות נוספות
       break;
   }
 }
