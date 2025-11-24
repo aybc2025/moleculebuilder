@@ -514,3 +514,63 @@ button:active {
     flex: 1 1 auto;
   }
 }
+
+/* באנר אתגר פעיל במשחק החופשי */
+.active-challenge-banner {
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 0.85rem;
+}
+
+/* רשימת אתגרים ומולקולות */
+.challenge-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.challenge-card {
+  border-radius: var(--radius-lg);
+  padding: 10px;
+  border: 1px solid var(--border-subtle);
+  background: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.challenge-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.challenge-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.challenge-formula {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.challenge-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.challenge-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.challenge-actions button {
+  flex: 1 1 0;
+  font-size: 0.8rem;
+}
