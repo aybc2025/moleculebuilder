@@ -145,8 +145,11 @@ let dragState = {
   atomId: null,
   offsetX: 0,
   offsetY: 0,
+  startX: 0,
+  startY: 0,
   moved: false,
 };
+
 let suppressNextClick = false;
 
 // אלמנטים
@@ -462,37 +465,53 @@ function renderBoard() {
 
     // גרירה
     node.addEventListener("pointerdown", (e) => {
-      e.stopPropagation();
-      const rect = boardEl.getBoundingClientRect();
-      const pointerX = e.clientX - rect.left;
-      const pointerY = e.clientY - rect.top;
-      dragState.atomId = atom.id;
-      dragState.offsetX = atom.x - pointerX;
-      dragState.offsetY = atom.y - pointerY;
-      dragState.moved = false;
-      node.setPointerCapture(e.pointerId);
-    });
+  e.stopPropagation();
+  const rect = boardEl.getBoundingClientRect();
+  const pointerX = e.clientX - rect.left;
+  const pointerY = e.clientY - rect.top;
 
+  dragState.atomId = atom.id;
+  dragState.offsetX = atom.x - pointerX;
+  dragState.offsetY = atom.y - pointerY;
+  dragState.startX = atom.x;  // נשמור מאיפה התחלנו
+  dragState.startY = atom.y;
+  dragState.moved = false;
+
+  node.setPointerCapture(e.pointerId);
+});
+    
     node.addEventListener("pointermove", (e) => {
-      if (dragState.atomId !== atom.id) return;
-      e.preventDefault();
-      const rect = boardEl.getBoundingClientRect();
-      const pointerX = e.clientX - rect.left;
-      const pointerY = e.clientY - rect.top;
+  if (dragState.atomId !== atom.id) return;
+  e.preventDefault();
 
-      let newX = pointerX + dragState.offsetX;
-      let newY = pointerY + dragState.offsetY;
-      const r = 26;
-      newX = Math.max(r, Math.min(rect.width - r, newX));
-      newY = Math.max(r, Math.min(rect.height - r, newY));
+  const rect = boardEl.getBoundingClientRect();
+  const pointerX = e.clientX - rect.left;
+  const pointerY = e.clientY - rect.top;
 
-      atom.x = newX;
-      atom.y = newY;
+  let newX = pointerX + dragState.offsetX;
+  let newY = pointerY + dragState.offsetY;
+
+  const r = 26;
+  newX = Math.max(r, Math.min(rect.width - r, newX));
+  newY = Math.max(r, Math.min(rect.height - r, newY));
+
+  atom.x = newX;
+  atom.y = newY;
+
+  // לבדוק אם זזנו "באמת" (יותר מכמה פיקסלים)
+  const dx = atom.x - dragState.startX;
+  const dy = atom.y - dragState.startY;
+  if (!dragState.moved) {
+    const distSq = dx * dx + dy * dy;
+    const DRAG_THRESHOLD_SQ = 5 * 5; // ~5px
+    if (distSq > DRAG_THRESHOLD_SQ) {
       dragState.moved = true;
+    }
+  }
 
-      renderBoard();
-    });
-
+  renderBoard();
+});
+    
     node.addEventListener("pointerup", (e) => {
       if (dragState.atomId === atom.id) {
         node.releasePointerCapture(e.pointerId);
