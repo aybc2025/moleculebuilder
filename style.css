@@ -1,16 +1,15 @@
 :root {
-  --bg: #020617;          /* רקע עמוק כהה */
-  --bg-elevated: #020617;
-  --card: #0f172a;
-  --card-soft: #020617;
-  --border-subtle: #1e293b;
-  --accent: #38bdf8;      /* כחול מודרני */
-  --accent-soft: rgba(56, 189, 248, 0.15);
-  --text-main: #e5e7eb;
-  --text-muted: #9ca3af;
-  --danger: #f97373;
-  --success: #22c55e;
-  --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.7);
+  --bg: #f5f5f0;          /* רקע כללי בהיר וחמים */
+  --bg-elevated: #ffffff;
+  --card: #ffffff;
+  --border-subtle: #e5e7eb;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56, 189, 248, 0.12);
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
   --radius-xl: 24px;
   --radius-lg: 18px;
   --radius-md: 12px;
@@ -24,12 +23,13 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: radial-gradient(circle at top, #0f172a 0, #020617 45%, #000 100%);
+  background: var(--bg);
   color: var(--text-main);
 }
 
@@ -50,6 +50,7 @@ body {
 }
 
 /* אנימציית כניסה רכה */
+
 .fade-in {
   animation: fadeInUp 0.6s var(--transition-med);
 }
@@ -57,7 +58,7 @@ body {
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -70,7 +71,7 @@ body {
 .app-header {
   padding: 14px 20px;
   border-radius: var(--radius-xl);
-  background: linear-gradient(110deg, #0b1120, #020617);
+  background: linear-gradient(110deg, #ffffff, #fef3c7);
   box-shadow: var(--shadow-soft);
   display: flex;
   flex-direction: column;
@@ -101,11 +102,10 @@ body {
 
 .card {
   border-radius: var(--radius-xl);
-  background: radial-gradient(circle at top, #020617 0, #020617 50%, #000 100%);
+  background: var(--card);
   border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-soft);
   padding: 14px;
-  backdrop-filter: blur(20px);
 }
 
 .panel-title {
@@ -140,13 +140,13 @@ button {
     color var(--transition-fast),
     transform 0.12s ease-out,
     box-shadow 0.12s ease-out;
-  background: #0b1120;
+  background: #f3f4f6;
   color: var(--text-main);
 }
 
 button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 25px rgba(15, 23, 42, 0.8);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
 }
 
 button:active {
@@ -155,17 +155,17 @@ button:active {
 }
 
 .primary-btn {
-  background: linear-gradient(135deg, var(--accent), #0ea5e9);
-  color: #0b1120;
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+  color: #f9fafb;
   font-weight: 600;
 }
 
 .primary-btn:hover {
-  background: linear-gradient(135deg, #7dd3fc, var(--accent));
+  background: linear-gradient(135deg, #0ea5e9, #38bdf8);
 }
 
 .secondary-btn {
-  background: radial-gradient(circle at top, #020617 0, #020617 60%, #000 100%);
+  background: #f9fafb;
   border: 1px solid var(--border-subtle);
 }
 
@@ -176,7 +176,7 @@ button:active {
 }
 
 .ghost-btn:hover {
-  background: rgba(15, 23, 42, 0.6);
+  background: #f9fafb;
 }
 
 /* קו מפריד */
@@ -238,10 +238,10 @@ button:active {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: radial-gradient(circle at top, rgba(56, 189, 248, 0.12), #020617);
   border-radius: var(--radius-lg);
   padding: 8px 10px;
-  border: 1px solid rgba(148, 163, 184, 0.5);
+  border: 1px solid var(--border-subtle);
+  background: #fefce8;
 }
 
 .atom-button-main {
@@ -259,7 +259,7 @@ button:active {
   justify-content: center;
   font-weight: 700;
   font-size: 0.9rem;
-  box-shadow: 0 0 16px rgba(148, 163, 184, 0.6);
+  box-shadow: 0 0 10px rgba(148, 163, 184, 0.6);
 }
 
 .atom-label {
@@ -302,15 +302,8 @@ button:active {
   min-height: 260px;
   border-radius: var(--radius-lg);
   background:
-    radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.15), transparent 50%),
-    radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.1), transparent 55%),
-    repeating-linear-gradient(
-      135deg,
-      rgba(15, 23, 42, 0.85) 0,
-      rgba(15, 23, 42, 0.85) 10px,
-      rgba(15, 23, 42, 0.7) 10px,
-      rgba(15, 23, 42, 0.7) 20px
-    );
+    linear-gradient(135deg, #f9fafb 25%, #f3f4f6 25%, #f3f4f6 50%, #f9fafb 50%, #f9fafb 75%, #f3f4f6 75%, #f3f4f6 100%);
+  background-size: 32px 32px;
   border: 1px solid var(--border-subtle);
   overflow: hidden;
 }
@@ -334,19 +327,18 @@ button:active {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #020617;
+  color: #111827;
   font-weight: 700;
   font-size: 1rem;
-  box-shadow: 0 16px 35px rgba(15, 23, 42, 0.95);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
   cursor: pointer;
   user-select: none;
   transition:
     transform var(--transition-med),
     box-shadow var(--transition-med),
-    filter var(--transition-med),
-    border var(--transition-fast);
-  border: 2px solid rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(12px);
+    border var(--transition-fast),
+    background-color var(--transition-fast);
+  border: 2px solid rgba(148, 163, 184, 0.6);
 }
 
 .atom-node span {
@@ -356,20 +348,19 @@ button:active {
 .atom-node-small {
   font-size: 0.65rem;
   font-weight: 500;
-  color: rgba(15, 23, 42, 0.8);
+  color: #374151;
 }
 
 .atom-node:hover {
-  transform: translateY(-3px) scale(1.03);
-  filter: brightness(1.05);
+  transform: translateY(-3px);
 }
 
 .atom-node.selected {
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.9), 0 18px 40px rgba(15, 23, 42, 1);
-  transform: translateY(-4px) scale(1.06);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.9), 0 12px 24px rgba(15, 23, 42, 0.2);
+  transform: translateY(-4px) scale(1.03);
 }
 
-/* מצבי שגיאה / הצלחה קלים */
+/* מצבי שגיאה */
 
 .atom-node.error {
   animation: atomError 0.4s ease-out;
@@ -396,26 +387,28 @@ button:active {
   line-height: 1.5;
   padding: 10px;
   border-radius: var(--radius-md);
-  background: rgba(15, 23, 42, 0.8);
+  background: #f9fafb;
   border: 1px solid var(--border-subtle);
   max-height: 200px;
   overflow-y: auto;
 }
 
 .message-area.success {
-  border-color: rgba(34, 197, 94, 0.7);
+  border-color: rgba(22, 163, 74, 0.8);
+  background: #ecfdf3;
 }
 
 .message-area.error {
-  border-color: rgba(248, 113, 113, 0.8);
+  border-color: rgba(220, 38, 38, 0.9);
+  background: #fef2f2;
 }
 
 .molecule-info {
   margin-top: 8px;
   padding: 10px;
   border-radius: var(--radius-md);
-  background: linear-gradient(130deg, rgba(34, 197, 94, 0.25), rgba(15, 23, 42, 0.95));
-  border: 1px solid rgba(34, 197, 94, 0.6);
+  background: #ecfdf3;
+  border: 1px solid rgba(22, 163, 74, 0.7);
   font-size: 0.85rem;
 }
 
@@ -440,7 +433,7 @@ button:active {
   display: none;
 }
 
-/* מסכי משנה */
+/* מסך אתגרים */
 
 .placeholder-card {
   font-size: 0.9rem;
@@ -459,7 +452,7 @@ button:active {
   border-radius: var(--radius-lg);
   padding: 10px;
   border: 1px solid var(--border-subtle);
-  background: radial-gradient(circle at top, rgba(148, 163, 184, 0.15), rgba(15, 23, 42, 0.9));
+  background: #f9fafb;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -480,7 +473,7 @@ button:active {
   justify-content: center;
   font-weight: 700;
   font-size: 0.9rem;
-  box-shadow: 0 0 12px rgba(148, 163, 184, 0.9);
+  box-shadow: 0 0 10px rgba(148, 163, 184, 0.9);
 }
 
 .atom-info-name {
