@@ -1022,6 +1022,225 @@ function setupDemoBondsForMolecule(mol) {
 // ===== פריסת אטומים במבנה דומה למציאות =====
 
 function applyMoleculeLayout(mol) {
+  const rect = boardEl.getBoundingClientRect();
+  const width = rect.width || boardEl.clientWidth || 400;
+  const height = rect.height || boardEl.clientHeight || 260;
+  const cx = width / 2;
+  const cy = height / 2;
+
+  const getAtoms = (symbol) => atomsOnBoard.filter((a) => a.symbol === symbol);
+
+  switch (mol.id) {
+    // מים H2O
+    case "water": {
+      const oAtoms = getAtoms("O");
+      const hAtoms = getAtoms("H");
+      if (oAtoms.length === 1 && hAtoms.length === 2) {
+        const O = oAtoms[0];
+        const [H1, H2] = hAtoms;
+        O.x = cx;
+        O.y = cy - 40;
+        H1.x = cx - 60;
+        H1.y = cy + 40;
+        H2.x = cx + 60;
+        H2.y = cy + 40;
+      }
+      break;
+    }
+
+    // חמצן נשימתי O2
+    case "oxygen": {
+      const oAtoms = getAtoms("O");
+      if (oAtoms.length === 2) {
+        oAtoms[0].x = cx - 60;
+        oAtoms[0].y = cy;
+        oAtoms[1].x = cx + 60;
+        oAtoms[1].y = cy;
+      }
+      break;
+    }
+
+    // מימן גזי H2
+    case "hydrogen-gas": {
+      const hAtoms = getAtoms("H");
+      if (hAtoms.length === 2) {
+        hAtoms[0].x = cx - 60;
+        hAtoms[0].y = cy;
+        hAtoms[1].x = cx + 60;
+        hAtoms[1].y = cy;
+      }
+      break;
+    }
+
+    // מי חמצן H2O2 : H–O–O–H
+    case "hydrogen-peroxide": {
+      const hAtoms = getAtoms("H");
+      const oAtoms = getAtoms("O");
+      if (hAtoms.length === 2 && oAtoms.length === 2) {
+        const [H1, H2] = hAtoms;
+        const [O1, O2] = oAtoms;
+        const spacing = 60;
+
+        O1.x = cx - spacing;
+        O1.y = cy;
+        O2.x = cx + spacing;
+        O2.y = cy;
+
+        H1.x = cx - spacing * 2;
+        H1.y = cy;
+        H2.x = cx + spacing * 2;
+        H2.y = cy;
+      }
+      break;
+    }
+
+    // פחמן דו־חמצני CO2 : O=C=O
+    case "carbon-dioxide": {
+      const cAtoms = getAtoms("C");
+      const oAtoms = getAtoms("O");
+      if (cAtoms.length === 1 && oAtoms.length === 2) {
+        const C = cAtoms[0];
+        const [O1, O2] = oAtoms;
+        C.x = cx;
+        C.y = cy;
+        O1.x = cx - 90;
+        O1.y = cy;
+        O2.x = cx + 90;
+        O2.y = cy;
+      }
+      break;
+    }
+
+    // מתאן CH4 : צלב 2D
+    case "methane": {
+      const cAtoms = getAtoms("C");
+      const hAtoms = getAtoms("H");
+      if (cAtoms.length === 1 && hAtoms.length === 4) {
+        const C = cAtoms[0];
+        C.x = cx;
+        C.y = cy;
+        const r = 80;
+        hAtoms[0].x = cx;
+        hAtoms[0].y = cy - r;
+        hAtoms[1].x = cx;
+        hAtoms[1].y = cy + r;
+        hAtoms[2].x = cx - r;
+        hAtoms[2].y = cy;
+        hAtoms[3].x = cx + r;
+        hAtoms[3].y = cy;
+      }
+      break;
+    }
+
+    // אמוניה NH3 : N למעלה, משולש של H מתחת
+    case "ammonia": {
+      const nAtoms = getAtoms("N");
+      const hAtoms = getAtoms("H");
+      if (nAtoms.length === 1 && hAtoms.length === 3) {
+        const N = nAtoms[0];
+        const [H1, H2, H3] = hAtoms;
+        N.x = cx;
+        N.y = cy - 40;
+        H1.x = cx - 60;
+        H1.y = cy + 40;
+        H2.x = cx + 60;
+        H2.y = cy + 40;
+        H3.x = cx;
+        H3.y = cy + 90;
+      }
+      break;
+    }
+
+    // פורמלדהיד CH2O : C באמצע, O למעלה, שני H למטה
+    case "formaldehyde": {
+      const cAtoms = getAtoms("C");
+      const hAtoms = getAtoms("H");
+      const oAtoms = getAtoms("O");
+      if (cAtoms.length === 1 && hAtoms.length === 2 && oAtoms.length === 1) {
+        const C = cAtoms[0];
+        const [H1, H2] = hAtoms;
+        const O = oAtoms[0];
+
+        C.x = cx;
+        C.y = cy;
+        O.x = cx;
+        O.y = cy - 80;
+        H1.x = cx - 60;
+        H1.y = cy + 70;
+        H2.x = cx + 60;
+        H2.y = cy + 70;
+      }
+      break;
+    }
+
+    // אתאן C2H6 : C–C באמצע, סביב כל C שלושה H
+    case "ethane": {
+      const cAtoms = getAtoms("C");
+      const hAtoms = getAtoms("H");
+      if (cAtoms.length === 2 && hAtoms.length === 6) {
+        const [C1, C2] = cAtoms;
+        const [H1, H2, H3, H4, H5, H6] = hAtoms;
+
+        const dx = 90;
+
+        C1.x = cx - dx / 2;
+        C1.y = cy;
+        C2.x = cx + dx / 2;
+        C2.y = cy;
+
+        // סביב C1
+        H1.x = C1.x;
+        H1.y = C1.y - 70;
+        H2.x = C1.x - 70;
+        H2.y = C1.y + 40;
+        H3.x = C1.x + 70;
+        H3.y = C1.y + 40;
+
+        // סביב C2
+        H4.x = C2.x;
+        H4.y = C2.y - 70;
+        H5.x = C2.x - 70;
+        H5.y = C2.y + 40;
+        H6.x = C2.x + 70;
+        H6.y = C2.y + 40;
+      }
+      break;
+    }
+
+    // מתנול CH3OH : C במרכז, 3 H מסביבו, O בצד עם H מחובר
+    case "methanol": {
+      const cAtoms = getAtoms("C");
+      const hAtoms = getAtoms("H");
+      const oAtoms = getAtoms("O");
+      if (cAtoms.length === 1 && hAtoms.length === 4 && oAtoms.length === 1) {
+        const C = cAtoms[0];
+        const O = oAtoms[0];
+        const [H1, H2, H3, H4] = hAtoms;
+
+        C.x = cx - 40;
+        C.y = cy;
+
+        // שלושת המימנים של הפחמן
+        H1.x = C.x;
+        H1.y = C.y - 70;
+        H2.x = C.x - 70;
+        H2.y = C.y + 40;
+        H3.x = C.x + 70;
+        H3.y = C.y + 40;
+
+        // קבוצת OH בצד ימין
+        O.x = cx + 60;
+        O.y = cy;
+        H4.x = O.x + 70;
+        H4.y = O.y;
+      }
+      break;
+    }
+
+    default:
+      break;
+  }
+}
 
 function showMoleculeInfo(mol) {
   moleculeInfoEl.classList.remove("hidden");
