@@ -1,6 +1,5 @@
 // ===== נתוני בסיס: אטומים ומולקולות מוכרות =====
 
-// כאן קל להוסיף אטומים חדשים בעתיד: פשוט להוסיף אובייקט חדש למערך ATOM_DEFS
 const ATOM_DEFS = [
   {
     symbol: "H",
@@ -32,7 +31,6 @@ const ATOM_DEFS = [
   },
 ];
 
-// מולקולות מוכרות (זיהוי לפי ספירת אטומים)
 const KNOWN_MOLECULES = [
   {
     id: "water",
@@ -63,8 +61,7 @@ const KNOWN_MOLECULES = [
     name_he: "מתאן",
     formula: "CH₄",
     atomCounts: { C: 1, H: 4 },
-    expl_he:
-      "זאת מולקולת מתאן. זה גז שיכול לשמש כדלק.",
+    expl_he: "זאת מולקולת מתאן. זה גז שיכול לשמש כדלק.",
   },
   {
     id: "ammonia",
@@ -76,7 +73,6 @@ const KNOWN_MOLECULES = [
   },
 ];
 
-// מיפוי מהיר לפי symbol כדי לחפש מידע על אטומים
 const ATOM_MAP = ATOM_DEFS.reduce((map, atom) => {
   map[atom.symbol] = atom;
   return map;
@@ -90,7 +86,8 @@ let atomIdCounter = 1;
 let bondIdCounter = 1;
 let selectedAtomId = null;
 
-// אלמנטים מה-DOM
+// אלמנטים
+
 const boardEl = document.getElementById("board");
 const bondLayerEl = document.getElementById("bond-layer");
 const atomPaletteEl = document.getElementById("atom-palette");
@@ -98,7 +95,7 @@ const messageAreaEl = document.getElementById("message-area");
 const moleculeInfoEl = document.getElementById("molecule-info");
 const atomInfoListEl = document.getElementById("atom-info-list");
 
-// ===== אתחול כללי =====
+// ===== אתחול =====
 
 document.addEventListener("DOMContentLoaded", () => {
   initScreens();
@@ -107,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
   attachButtons();
 });
 
-// ===== ניהול מסכים (מצבים) =====
+// ===== מסכים =====
 
 function initScreens() {
   const buttons = document.querySelectorAll("[data-screen-target]");
@@ -122,18 +119,13 @@ function initScreens() {
 function switchScreen(targetId) {
   const screens = document.querySelectorAll(".screen");
   screens.forEach((screen) => {
-    if (screen.id === targetId) {
-      screen.classList.add("active");
-    } else {
-      screen.classList.remove("active");
-    }
+    screen.classList.toggle("active", screen.id === targetId);
   });
 }
 
-// ===== בניית סרגל אטומים =====
+// ===== סרגל אטומים =====
 
 function buildAtomPalette() {
-  // מנקים (אם נבנה שוב בעתיד)
   const existingButtons = atomPaletteEl.querySelectorAll(".atom-button");
   existingButtons.forEach((b) => b.remove());
 
@@ -225,7 +217,7 @@ function buildAtomInfoList() {
   });
 }
 
-// ===== כפתורי פעולה כלליים =====
+// ===== כפתורי פעולה =====
 
 function attachButtons() {
   const checkBtn = document.getElementById("btn-check-molecule");
@@ -238,24 +230,24 @@ function attachButtons() {
   resetBtn.addEventListener("click", () => {
     resetBoard();
   });
+
+  // לחיצה על הרקע מבטלת בחירה
+  boardEl.addEventListener("click", () => {
+    selectedAtomId = null;
+    updateSelectionVisual();
+  });
 }
 
-// ===== לוח עבודה: אטומים וקשרים =====
+// ===== לוח עבודה =====
 
 function addAtomToBoard(symbol) {
   const atomDef = ATOM_MAP[symbol];
   if (!atomDef) return;
 
   const rect = boardEl.getBoundingClientRect();
-
-  // ממקמים אטום חדש במיקום חצי־אקראי בתוך הלוח
-  const padding = 60;
-  const x =
-    Math.random() * (rect.width - padding * 2) +
-    padding;
-  const y =
-    Math.random() * (rect.height - padding * 2) +
-    padding;
+  const padding = 70;
+  const x = Math.random() * (rect.width - padding * 2) + padding;
+  const y = Math.random() * (rect.height - padding * 2) + padding;
 
   const atom = {
     id: "a" + atomIdCounter++,
@@ -266,23 +258,18 @@ function addAtomToBoard(symbol) {
   atomsOnBoard.push(atom);
   renderBoard();
 
-  showMessage(
-    `הוספת אטום ${atomDef.name_he} ללוח.`,
-    "neutral"
-  );
+  showMessage(`הוספת אטום ${atomDef.name_he} ללוח.`, "neutral");
 }
 
 function renderBoard() {
-  // ניקוי כל האטומים הקיימים
   const existingNodes = boardEl.querySelectorAll(".atom-node");
   existingNodes.forEach((n) => n.remove());
 
-  // ניקוי קשרים קיימים ב-SVG
   while (bondLayerEl.firstChild) {
     bondLayerEl.removeChild(bondLayerEl.firstChild);
   }
 
-  // יצירת אטומים
+  // אטומים
   atomsOnBoard.forEach((atom) => {
     const atomDef = ATOM_MAP[atom.symbol];
     const node = document.createElement("div");
@@ -301,7 +288,6 @@ function renderBoard() {
     node.appendChild(symbolSpan);
     node.appendChild(extraSpan);
 
-    // הצבה
     node.style.left = `${atom.x - 26}px`;
     node.style.top = `${atom.y - 26}px`;
 
@@ -310,28 +296,22 @@ function renderBoard() {
       handleAtomClick(atom.id);
     });
 
-    // ניתן להוסיף גרירה עדינה בעתיד; לעכשיו, להשאיר קבוע
-    // (כדי להוסיף גרירה: pointerdown + pointermove + pointerup על node)
-
     boardEl.appendChild(node);
   });
 
-  // יצירת קווי קשרים
+  // קשרים (קווים)
   bonds.forEach((bond) => {
     const atomA = atomsOnBoard.find((a) => a.id === bond.aId);
     const atomB = atomsOnBoard.find((a) => a.id === bond.bId);
     if (!atomA || !atomB) return;
 
-    const line = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "line"
-    );
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.setAttribute("x1", atomA.x);
     line.setAttribute("y1", atomA.y);
     line.setAttribute("x2", atomB.x);
     line.setAttribute("y2", atomB.y);
-    line.setAttribute("stroke", "rgba(226,232,240,0.9)");
-    line.setAttribute("stroke-width", "3");
+    line.setAttribute("stroke", "rgba(75,85,99,0.95)"); // אפור כהה על רקע בהיר
+    line.setAttribute("stroke-width", "3.2");
     line.setAttribute("stroke-linecap", "round");
 
     bondLayerEl.appendChild(line);
@@ -342,7 +322,6 @@ function renderBoard() {
 
 function handleAtomClick(atomId) {
   if (!selectedAtomId) {
-    // בחירת האטום הראשון
     selectedAtomId = atomId;
     updateSelectionVisual();
     const atom = atomsOnBoard.find((a) => a.id === atomId);
@@ -357,14 +336,12 @@ function handleAtomClick(atomId) {
   }
 
   if (selectedAtomId === atomId) {
-    // ביטול בחירה
     selectedAtomId = null;
     updateSelectionVisual();
     showMessage("ביטלנו את הבחירה.", "neutral");
     return;
   }
 
-  // ניסוי חיבור בין שני האטומים
   const aId = selectedAtomId;
   const bId = atomId;
   tryToggleBond(aId, bId);
@@ -374,25 +351,17 @@ function updateSelectionVisual() {
   const nodes = boardEl.querySelectorAll(".atom-node");
   nodes.forEach((node) => {
     const id = node.dataset.atomId;
-    if (id === selectedAtomId) {
-      node.classList.add("selected");
-    } else {
-      node.classList.remove("selected");
-    }
+    node.classList.toggle("selected", id === selectedAtomId);
   });
 }
 
-// ניסיון להוסיף/להסיר קשר
 function tryToggleBond(aId, bId) {
-  // האם כבר יש קשר?
   const existing = bonds.find(
     (b) =>
-      (b.aId === aId && b.bId === bId) ||
-      (b.aId === bId && b.bId === aId)
+      (b.aId === aId && b.bId === bId) || (b.aId === bId && b.bId === aId)
   );
 
   if (existing) {
-    // הסרת קשר
     bonds = bonds.filter((b) => b !== existing);
     selectedAtomId = null;
     renderBoard();
@@ -400,7 +369,6 @@ function tryToggleBond(aId, bId) {
     return;
   }
 
-  // קשר חדש: בדיקת ידיים
   const atomA = atomsOnBoard.find((a) => a.id === aId);
   const atomB = atomsOnBoard.find((a) => a.id === bId);
   if (!atomA || !atomB) return;
@@ -412,7 +380,6 @@ function tryToggleBond(aId, bId) {
   const usedB = getBondCount(bId);
 
   if (usedA >= defA.maxBonds || usedB >= defB.maxBonds) {
-    // חיבור לא אפשרי
     selectedAtomId = null;
     flashAtomError([aId, bId]);
     const overAtom = usedA >= defA.maxBonds ? defA : defB;
@@ -424,7 +391,6 @@ function tryToggleBond(aId, bId) {
     return;
   }
 
-  // יצירת קשר
   bonds.push({
     id: "b" + bondIdCounter++,
     aId,
@@ -436,9 +402,7 @@ function tryToggleBond(aId, bId) {
 }
 
 function getBondCount(atomId) {
-  return bonds.filter(
-    (b) => b.aId === atomId || b.bId === atomId
-  ).length;
+  return bonds.filter((b) => b.aId === atomId || b.bId === atomId).length;
 }
 
 function flashAtomError(atomIds) {
@@ -454,7 +418,6 @@ function flashAtomError(atomIds) {
   });
 }
 
-// איפוס לוח
 function resetBoard() {
   atomsOnBoard = [];
   bonds = [];
@@ -465,7 +428,7 @@ function resetBoard() {
   showMessage("איפסנו את הלוח. תוכל להתחיל לבנות מולקולה חדשה.", "neutral");
 }
 
-// ===== בדיקת המולקולה הנוכחית =====
+// ===== בדיקת מולקולה + פריסת אטומים =====
 
 function checkCurrentMolecule() {
   if (!atomsOnBoard.length) {
@@ -473,7 +436,7 @@ function checkCurrentMolecule() {
     return;
   }
 
-  // 1. בדיקת "ידיים" לכל אטום
+  // בדיקת ידיים
   for (const atom of atomsOnBoard) {
     const def = ATOM_MAP[atom.symbol];
     const used = getBondCount(atom.id);
@@ -489,20 +452,19 @@ function checkCurrentMolecule() {
     }
   }
 
-  // 2. ספירת אטומים לפי סוג
   const counts = {};
   for (const atom of atomsOnBoard) {
     counts[atom.symbol] = (counts[atom.symbol] || 0) + 1;
   }
 
-  // 3. ניסיון לזהות מולקולה מוכרת
   const match = findMatchingMolecule(counts);
 
   if (match) {
-    showMessage(
-      `כל הכבוד! בנית מולקולה מוכרת: ${match.name_he}.`,
-      "success"
-    );
+    // פריסת אטומים בצורה שתדמה את המבנה
+    applyMoleculeLayout(match);
+    renderBoard();
+
+    showMessage(`כל הכבוד! בנית מולקולה מוכרת: ${match.name_he}.`, "success");
     showMoleculeInfo(match);
   } else {
     showMessage(
@@ -520,7 +482,6 @@ function findMatchingMolecule(counts) {
     const symbolsInMol = Object.keys(molCounts);
     const symbolsInCurrent = Object.keys(counts);
 
-    // חייב להיות אותו סט של סימולים
     if (symbolsInMol.length !== symbolsInCurrent.length) return false;
 
     for (const symbol of symbolsInMol) {
@@ -528,6 +489,103 @@ function findMatchingMolecule(counts) {
     }
     return true;
   });
+}
+
+// פריסת אטומים “דומה למציאות” במרכז הלוח
+function applyMoleculeLayout(mol) {
+  const rect = boardEl.getBoundingClientRect();
+  const cx = rect.width / 2;
+  const cy = rect.height / 2;
+
+  const getAtoms = (symbol) =>
+    atomsOnBoard.filter((a) => a.symbol === symbol);
+
+  switch (mol.id) {
+    case "water": {
+      // H2O – צורת V
+      const oAtoms = getAtoms("O");
+      const hAtoms = getAtoms("H");
+      if (oAtoms.length === 1 && hAtoms.length === 2) {
+        const O = oAtoms[0];
+        const [H1, H2] = hAtoms;
+        O.x = cx;
+        O.y = cy - 40;
+        H1.x = cx - 60;
+        H1.y = cy + 40;
+        H2.x = cx + 60;
+        H2.y = cy + 40;
+      }
+      break;
+    }
+    case "oxygen": {
+      // O2 – קו ישר
+      const oAtoms = getAtoms("O");
+      if (oAtoms.length === 2) {
+        oAtoms[0].x = cx - 60;
+        oAtoms[0].y = cy;
+        oAtoms[1].x = cx + 60;
+        oAtoms[1].y = cy;
+      }
+      break;
+    }
+    case "carbon-dioxide": {
+      // CO2 – קו ישר: O–C–O
+      const cAtoms = getAtoms("C");
+      const oAtoms = getAtoms("O");
+      if (cAtoms.length === 1 && oAtoms.length === 2) {
+        const C = cAtoms[0];
+        const [O1, O2] = oAtoms;
+        C.x = cx;
+        C.y = cy;
+        O1.x = cx - 90;
+        O1.y = cy;
+        O2.x = cx + 90;
+        O2.y = cy;
+      }
+      break;
+    }
+    case "methane": {
+      // CH4 – C במרכז, H בצורת צלב 2D
+      const cAtoms = getAtoms("C");
+      const hAtoms = getAtoms("H");
+      if (cAtoms.length === 1 && hAtoms.length === 4) {
+        const C = cAtoms[0];
+        C.x = cx;
+        C.y = cy;
+        const r = 80;
+        hAtoms[0].x = cx;
+        hAtoms[0].y = cy - r;
+        hAtoms[1].x = cx;
+        hAtoms[1].y = cy + r;
+        hAtoms[2].x = cx - r;
+        hAtoms[2].y = cy;
+        hAtoms[3].x = cx + r;
+        hAtoms[3].y = cy;
+      }
+      break;
+    }
+    case "ammonia": {
+      // NH3 – משולש של H מתחת ל-N
+      const nAtoms = getAtoms("N");
+      const hAtoms = getAtoms("H");
+      if (nAtoms.length === 1 && hAtoms.length === 3) {
+        const N = nAtoms[0];
+        const [H1, H2, H3] = hAtoms;
+        N.x = cx;
+        N.y = cy - 40;
+        H1.x = cx - 60;
+        H1.y = cy + 40;
+        H2.x = cx + 60;
+        H2.y = cy + 40;
+        H3.x = cx;
+        H3.y = cy + 90;
+      }
+      break;
+    }
+    default:
+      // למולקולות אחרות בעתיד אפשר להוסיף כאן תבניות נוספות
+      break;
+  }
 }
 
 function showMoleculeInfo(mol) {
