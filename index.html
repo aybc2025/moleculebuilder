@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <title>בונה המולקולות</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <meta name="theme-color" content="#0f172a" />
+</head>
+<body>
+  <div id="app" class="app fade-in">
+    <header class="app-header">
+      <div class="app-title">בונה המולקולות</div>
+      <div class="app-subtitle">משחק חיבור אטומים לילדים</div>
+    </header>
+
+    <main class="app-main">
+      <!-- פאנל צדדי: בחירת מצב -->
+      <nav class="side-panel card">
+        <h2 class="panel-title">מצבים</h2>
+        <button class="primary-btn" data-screen-target="screen-freeplay">
+          🔬 משחק חופשי
+        </button>
+        <button class="secondary-btn" data-screen-target="screen-challenges">
+          ⭐ אתגרי בנייה
+        </button>
+        <button class="secondary-btn" data-screen-target="screen-atoms">
+          🧪 למד על האטומים
+        </button>
+        <hr class="divider" />
+        <button class="ghost-btn" id="btn-check-molecule">
+          ✅ בדוק את המולקולה
+        </button>
+        <button class="ghost-btn" id="btn-reset-board">
+          🗑️ נקה לוח
+        </button>
+      </nav>
+
+      <!-- אזור תוכן דינמי -->
+      <section class="content-area">
+        <!-- מסך משחק חופשי -->
+        <section id="screen-freeplay" class="screen active">
+          <div class="screen-header">
+            <h2>משחק חופשי</h2>
+            <p class="screen-desc">
+              גררו אטומים ללוח, הקליקו על שני אטומים כדי לחבר ביניהם, ובדקו אם בניתם מולקולה אפשרית.
+            </p>
+          </div>
+
+          <div class="workspace">
+            <!-- סרגל האטומים -->
+            <div class="atom-palette card" id="atom-palette">
+              <h3 class="panel-title">אטומים</h3>
+              <!-- הכפתורים של האטומים ייבנו דינאמית מתוך app.js -->
+            </div>
+
+            <!-- לוח עבודה + SVG לקשרים -->
+            <div class="board-wrapper card">
+              <div class="board-toolbar">
+                <span>לחצו על אטום אחד ואז על אחר כדי ליצור קשר.</span>
+              </div>
+              <div class="board" id="board">
+                <svg class="bond-layer" id="bond-layer"></svg>
+                <!-- האטומים (div) יתווספו כאן דינאמית -->
+              </div>
+            </div>
+
+            <!-- הודעות ומשוב -->
+            <div class="message-panel card">
+              <h3 class="panel-title">הודעות</h3>
+              <div id="message-area" class="message-area">
+                ברוך הבא! התחל בלחיצה על אחד האטומים כדי להוסיף אותו ללוח.
+              </div>
+              <div id="molecule-info" class="molecule-info hidden"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- מסך אתגרים (V1: בסיס, אפשר להרחיב בהמשך) -->
+        <section id="screen-challenges" class="screen">
+          <div class="screen-header">
+            <h2>אתגרי בנייה</h2>
+            <p class="screen-desc">
+              בגרסה הראשונה זהו מסך בסיסי. בהמשך אפשר להוסיף כאן משימות כמו "בנה מים", "בנה CO₂" ועוד.
+            </p>
+          </div>
+          <div class="placeholder-card card">
+            בקרוב: רשימת משימות ומעקב אחרי מולקולות שכבר בנית.
+          </div>
+        </section>
+
+        <!-- מסך מידע על אטומים -->
+        <section id="screen-atoms" class="screen">
+          <div class="screen-header">
+            <h2>למד על האטומים</h2>
+            <p class="screen-desc">
+              לכל אטום יש מספר "ידיים" (קשרים) שאיתן הוא יכול להחזיק אטומים אחרים.
+            </p>
+          </div>
+          <div id="atom-info-list" class="atom-info-list">
+            <!-- ימולא דינאמית מתוך רשימת האטומים -->
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // רישום Service Worker ל-PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
