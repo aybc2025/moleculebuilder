@@ -65,6 +65,22 @@
               </div>
             </div>
 
+            <!-- תצוגה תלת־מימדית -->
+            <div class="viewer3d card" id="viewer3d-card">
+              <div class="viewer3d-header">
+                <h3 class="panel-title">תצוגה תלת־מימדית</h3>
+                <span class="viewer3d-hint">כשתזהו או תציגו מולקולה, היא תופיע כאן.</span>
+              </div>
+              <canvas
+                id="viewer3d-canvas"
+                class="viewer3d-canvas"
+                aria-label="תצוגה תלת־מימדית של המולקולה"
+              ></canvas>
+              <div class="viewer3d-empty-hint">
+                עדיין אין מולקולה להצגה. נסו לבנות מולקולה או לבחור אחת מאתגרי הבנייה.
+              </div>
+            </div>
+
             <!-- הודעות ומשוב -->
             <div class="message-panel card">
               <h3 class="panel-title">הודעות</h3>
@@ -103,6 +119,9 @@
     </main>
   </div>
 
+  <!-- טעינה לוקאלית של Three.js + OrbitControls + האפליקציה -->
+  <script src="three.min.js"></script>
+  <script src="OrbitControls.js"></script>
   <script src="app.js"></script>
   <script>
     if ("serviceWorker" in navigator) {
