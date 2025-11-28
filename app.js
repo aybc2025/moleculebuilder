@@ -124,6 +124,151 @@ const KNOWN_MOLECULES = [
   }
 ];
 
+// מודלים פשוטים לתצוגה תלת־מימדית של המולקולות המוכרות
+const MOLECULE_3D_MODELS = {
+  water: {
+    atoms: [
+      { symbol: "O", position: [0, 0, 0] },
+      { symbol: "H", position: [1.3, 0.8, 0] },
+      { symbol: "H", position: [-1.3, 0.8, 0] }
+    ],
+    bonds: [
+      [0, 1, 1],
+      [0, 2, 1]
+    ]
+  },
+
+  oxygen: {
+    atoms: [
+      { symbol: "O", position: [-1.2, 0, 0] },
+      { symbol: "O", position: [1.2, 0, 0] }
+    ],
+    bonds: [[0, 1, 2]]
+  },
+
+  "hydrogen-gas": {
+    atoms: [
+      { symbol: "H", position: [-1.2, 0, 0] },
+      { symbol: "H", position: [1.2, 0, 0] }
+    ],
+    bonds: [[0, 1, 1]]
+  },
+
+  "hydrogen-peroxide": {
+    atoms: [
+      { symbol: "H", position: [-2.4, 0, 0] },
+      { symbol: "O", position: [-0.8, 0, 0] },
+      { symbol: "O", position: [0.8, 0, 0] },
+      { symbol: "H", position: [2.4, 0, 0] }
+    ],
+    bonds: [
+      [0, 1, 1],
+      [1, 2, 1],
+      [2, 3, 1]
+    ]
+  },
+
+  "carbon-dioxide": {
+    atoms: [
+      { symbol: "O", position: [-2.0, 0, 0] },
+      { symbol: "C", position: [0, 0, 0] },
+      { symbol: "O", position: [2.0, 0, 0] }
+    ],
+    bonds: [
+      [0, 1, 2],
+      [1, 2, 2]
+    ]
+  },
+
+  methane: {
+    atoms: [
+      { symbol: "C", position: [0, 0, 0] },
+      { symbol: "H", position: [1.4, 1.4, 0] },
+      { symbol: "H", position: [-1.4, 1.4, 0] },
+      { symbol: "H", position: [-1.4, -1.4, 0] },
+      { symbol: "H", position: [1.4, -1.4, 0] }
+    ],
+    bonds: [
+      [0, 1, 1],
+      [0, 2, 1],
+      [0, 3, 1],
+      [0, 4, 1]
+    ]
+  },
+
+  ammonia: {
+    atoms: [
+      { symbol: "N", position: [0, 0.6, 0] },
+      { symbol: "H", position: [1.4, -0.6, 0] },
+      { symbol: "H", position: [-1.4, -0.6, 0] },
+      { symbol: "H", position: [0, -1.6, 0] }
+    ],
+    bonds: [
+      [0, 1, 1],
+      [0, 2, 1],
+      [0, 3, 1]
+    ]
+  },
+
+  formaldehyde: {
+    atoms: [
+      { symbol: "C", position: [0, 0, 0] },
+      { symbol: "O", position: [0, 2.0, 0] },
+      { symbol: "H", position: [-1.6, -1.2, 0] },
+      { symbol: "H", position: [1.6, -1.2, 0] }
+    ],
+    bonds: [
+      [0, 1, 2],
+      [0, 2, 1],
+      [0, 3, 1]
+    ]
+  },
+
+  ethane: {
+    atoms: [
+      { symbol: "C", position: [-1.0, 0, 0] },
+      { symbol: "C", position: [1.0, 0, 0] },
+
+      { symbol: "H", position: [-2.4, 1.2, 0] },
+      { symbol: "H", position: [-2.4, -1.2, 0] },
+      { symbol: "H", position: [-1.0, 0, 1.8] },
+
+      { symbol: "H", position: [2.4, 1.2, 0] },
+      { symbol: "H", position: [2.4, -1.2, 0] },
+      { symbol: "H", position: [1.0, 0, -1.8] }
+    ],
+    bonds: [
+      [0, 1, 1],
+
+      [0, 2, 1],
+      [0, 3, 1],
+      [0, 4, 1],
+
+      [1, 5, 1],
+      [1, 6, 1],
+      [1, 7, 1]
+    ]
+  },
+
+  methanol: {
+    atoms: [
+      { symbol: "C", position: [0, 0, 0] },
+      { symbol: "O", position: [0, 2.0, 0] },
+      { symbol: "H", position: [0, 3.4, 0] },
+      { symbol: "H", position: [-1.8, -1.2, 0] },
+      { symbol: "H", position: [1.8, -1.2, 0] },
+      { symbol: "H", position: [0, -2.0, 0] }
+    ],
+    bonds: [
+      [0, 1, 1],
+      [1, 2, 1],
+      [0, 3, 1],
+      [0, 4, 1],
+      [0, 5, 1]
+    ]
+  }
+};
+
 const ATOM_MAP = ATOM_DEFS.reduce((map, atom) => {
   map[atom.symbol] = atom;
   return map;
@@ -162,6 +307,8 @@ const moleculeInfoEl = document.getElementById("molecule-info");
 const atomInfoListEl = document.getElementById("atom-info-list");
 const challengeListEl = document.getElementById("challenge-list");
 const activeChallengeBannerEl = document.getElementById("active-challenge-banner");
+const viewer3dCanvas = document.getElementById("viewer3d-canvas");
+const viewer3dCardEl = document.getElementById("viewer3d-card");
 
 // ===== אתחול =====
 
@@ -719,7 +866,7 @@ function checkCurrentMolecule() {
     return;
   }
 
-  // בדיקת "ידיים"
+  // בדיקת "ידיים" לכל אטום
   for (const atom of atomsOnBoard) {
     const def = ATOM_MAP[atom.symbol];
     const used = getBondOrderSum(atom.id);
@@ -735,7 +882,7 @@ function checkCurrentMolecule() {
     }
   }
 
-  // ספירת אטומים
+  // ספירת אטומים לפי סוג
   const counts = {};
   for (const atom of atomsOnBoard) {
     counts[atom.symbol] = (counts[atom.symbol] || 0) + 1;
@@ -761,6 +908,7 @@ function checkCurrentMolecule() {
         "neutral"
       );
       showMoleculeInfo(match);
+      renderMolecule3D(match);
       return;
     }
 
@@ -772,6 +920,7 @@ function checkCurrentMolecule() {
       "success"
     );
     showMoleculeInfo(match);
+    renderMolecule3D(match);
     currentChallenge = null;
     updateActiveChallengeBanner();
     return;
@@ -786,6 +935,7 @@ function checkCurrentMolecule() {
       "success"
     );
     showMoleculeInfo(match);
+    renderMolecule3D(match);
   } else {
     showMessage(
       "המולקולה שבנית עומדת בכללי הידיים, אבל היא לא אחת מהמולקולות המוכרות באפליקציה.",
@@ -830,9 +980,10 @@ function showMoleculeSample(mol) {
   });
 
   setupDemoBondsForMolecule(mol);
-  applyMoleculeLayout(mol);
+    applyMoleculeLayout(mol);
   renderBoard();
   showMoleculeInfo(mol);
+  renderMolecule3D(mol);
   showMessage(`מציגים דוגמה של המולקולה "${mol.name_he}".`, "neutral");
 }
 
@@ -1279,5 +1430,183 @@ function showMessage(text, type) {
     messageAreaEl.classList.add("success");
   } else if (type === "error") {
     messageAreaEl.classList.add("error");
+  }
+}
+
+// ===== תצוגה תלת־מימדית של מולקולות =====
+
+let threeInitialized = false;
+let threeScene = null;
+let threeCamera = null;
+let threeRenderer = null;
+let threeControls = null;
+let threeAtomMeshes = [];
+let threeBondMeshes = [];
+
+const ATOM_RADIUS_3D = {
+  H: 0.35,
+  C: 0.55,
+  N: 0.55,
+  O: 0.5
+};
+
+function getAtomColor3D(symbol) {
+  const def = ATOM_MAP[symbol];
+  return (def && def.color) || "#9ca3af";
+}
+
+function init3DViewer() {
+  if (!viewer3dCanvas || !window.THREE) {
+    return;
+  }
+  const parent = viewer3dCanvas.parentElement || viewer3dCanvas;
+  const width = parent.clientWidth || 320;
+  const height = parent.clientHeight || 260;
+
+  threeRenderer = new THREE.WebGLRenderer({
+    canvas: viewer3dCanvas,
+    antialias: true,
+    alpha: true
+  });
+  threeRenderer.setPixelRatio(window.devicePixelRatio || 1);
+  threeRenderer.setSize(width, height, false);
+
+  threeScene = new THREE.Scene();
+  threeScene.background = new THREE.Color(0xf3f4f6);
+
+  const aspect = width / height;
+  threeCamera = new THREE.PerspectiveCamera(45, aspect, 0.1, 100);
+  threeCamera.position.set(0, 0, 14);
+
+  const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.9);
+  hemi.position.set(0, 20, 0);
+  threeScene.add(hemi);
+
+  const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+  dir.position.set(5, 10, 7.5);
+  threeScene.add(dir);
+
+  if (THREE.OrbitControls) {
+    threeControls = new THREE.OrbitControls(threeCamera, viewer3dCanvas);
+    threeControls.enableDamping = true;
+    threeControls.dampingFactor = 0.1;
+    threeControls.rotateSpeed = 0.8;
+  }
+
+  window.addEventListener("resize", handle3DResize);
+  threeInitialized = true;
+  animate3D();
+}
+
+function handle3DResize() {
+  if (!threeInitialized || !threeRenderer || !threeCamera) return;
+  const parent = viewer3dCanvas.parentElement || viewer3dCanvas;
+  const width = parent.clientWidth || 320;
+  const height = parent.clientHeight || 260;
+
+  threeCamera.aspect = width / height;
+  threeCamera.updateProjectionMatrix();
+  threeRenderer.setSize(width, height, false);
+}
+
+function animate3D() {
+  if (!threeInitialized || !threeRenderer || !threeScene || !threeCamera) return;
+  requestAnimationFrame(animate3D);
+  if (threeControls) {
+    threeControls.update();
+  }
+  threeRenderer.render(threeScene, threeCamera);
+}
+
+function clear3DScene() {
+  if (!threeScene) return;
+  threeAtomMeshes.forEach((m) => threeScene.remove(m));
+  threeBondMeshes.forEach((m) => threeScene.remove(m));
+  threeAtomMeshes = [];
+  threeBondMeshes = [];
+}
+
+function createBondCylinder(start, end, radius) {
+  const dir = new THREE.Vector3().subVectors(end, start);
+  const length = dir.length();
+  const geom = new THREE.CylinderGeometry(radius, radius, length, 16);
+  const mat = new THREE.MeshStandardMaterial({ color: 0x374151 });
+
+  const mesh = new THREE.Mesh(geom, mat);
+
+  // ממקמים במרכז בין שתי הנקודות
+  const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+  mesh.position.copy(mid);
+
+  // מסובבים לציר המתאים
+  const axis = new THREE.Vector3(0, 1, 0);
+  mesh.quaternion.setFromUnitVectors(axis, dir.clone().normalize());
+
+  return mesh;
+}
+
+function renderMolecule3D(mol) {
+  if (!viewer3dCanvas || !window.THREE || !MOLECULE_3D_MODELS) return;
+
+  const model = MOLECULE_3D_MODELS[mol.id] || MOLECULE_3D_MODELS[mol.id && mol.id.toString()];
+  if (!model) {
+    if (viewer3dCardEl) viewer3dCardEl.classList.add("hidden");
+    return;
+  }
+
+  if (viewer3dCardEl) viewer3dCardEl.classList.remove("hidden");
+
+  if (!threeInitialized) {
+    init3DViewer();
+    if (!threeInitialized) return;
+  }
+
+  clear3DScene();
+
+  // יצירת אטומים
+  threeAtomMeshes = model.atoms.map((atomDef) => {
+    const [x, y, z] = atomDef.position;
+    const radius = ATOM_RADIUS_3D[atomDef.symbol] || 0.4;
+    const geom = new THREE.SphereGeometry(radius, 32, 32);
+    const color = new THREE.Color(getAtomColor3D(atomDef.symbol));
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.2, metalness: 0.0 });
+    const mesh = new THREE.Mesh(geom, mat);
+    mesh.position.set(x, y, z);
+    threeScene.add(mesh);
+    return mesh;
+  });
+
+  // יצירת קשרים
+  threeBondMeshes = [];
+  model.bonds.forEach((bond) => {
+    const [aIndex, bIndex, order] = bond;
+    const a = threeAtomMeshes[aIndex];
+    const b = threeAtomMeshes[bIndex];
+    if (!a || !b) return;
+
+    const baseStart = a.position.clone();
+    const baseEnd = b.position.clone();
+
+    const bondCount = order === 3 ? 3 : order === 2 ? 2 : 1;
+    const offsetDir = new THREE.Vector3().subVectors(baseEnd, baseStart).cross(new THREE.Vector3(0, 1, 0));
+    if (offsetDir.lengthSq() === 0) {
+      offsetDir.set(1, 0, 0);
+    }
+    offsetDir.normalize().multiplyScalar(0.15);
+
+    for (let i = 0; i < bondCount; i++) {
+      const t = bondCount === 1 ? 0 : i - (bondCount - 1) / 2;
+      const start = baseStart.clone().add(offsetDir.clone().multiplyScalar(t));
+      const end = baseEnd.clone().add(offsetDir.clone().multiplyScalar(t));
+      const bondMesh = createBondCylinder(start, end, 0.12);
+      threeScene.add(bondMesh);
+      threeBondMeshes.push(bondMesh);
+    }
+  });
+
+  // ממרכזים את המצלמה
+  if (threeControls) {
+    threeControls.target.set(0, 0, 0);
+    threeControls.update();
   }
 }
