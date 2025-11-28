@@ -5,6 +5,8 @@ const ASSETS = [
   "./style.css",
   "./app.js",
   "./manifest.json",
+  "./three.min.js",
+  "./OrbitControls.js",
 ];
 
 self.addEventListener("install", (event) => {
