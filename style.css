@@ -574,3 +574,43 @@ button:active {
   flex: 1 1 0;
   font-size: 0.8rem;
 }
+
+/* ===== תצוגה תלת־מימדית ===== */
+
+.viewer3d {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.viewer3d-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.viewer3d-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.viewer3d-canvas {
+  width: 100%;
+  height: 260px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-soft);
+  background: var(--bg-elevated);
+}
+
+.viewer3d-empty-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+@media (min-width: 1024px) {
+  .viewer3d-canvas {
+    height: 320px;
+  }
+}
