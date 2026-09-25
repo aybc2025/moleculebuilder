@@ -1,0 +1,159 @@
+/* איפוס, גופנים, כפתורים ופוקוס */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.25;
+  margin: 0;
+}
+
+p { margin: 0; text-wrap: pretty; }
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:disabled { cursor: default; }
+
+:focus-visible {
+  outline: 3px solid var(--spark);
+  outline-offset: 2px;
+}
+
+[hidden] { display: none !important; }
+
+/* נוסחאות: ספרות כתוויות מנוי, עם כיוון LTR */
+.formula {
+  font-family: var(--font-display);
+  direction: ltr;
+  unicode-bidi: isolate;
+  white-space: nowrap;
+}
+.formula sub { font-size: 0.72em; line-height: 0; }
+
+.icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* אייקונים כיווניים מתהפכים על העוטף, לא על האלמנט עצמו */
+.icon-flip { display: inline-flex; }
+[dir="rtl"] .icon-flip { transform: scaleX(-1); }
+
+/* ---- כפתורים ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  min-height: 48px;
+  padding: 0 var(--s4);
+  border-radius: var(--r-full);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  transition: transform var(--t-press) var(--ease-out), background-color var(--t-press) ease, opacity var(--t-press) ease;
+}
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn:disabled { opacity: 0.45; }
+
+.btn-primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.btn-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink-soft);
+  min-height: 40px;
+  padding: 0 var(--s3);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover:not(:disabled) { background: var(--paper); }
+  .btn-primary:hover:not(:disabled) { background: #22364f; }
+  .btn-ghost:hover:not(:disabled) { color: var(--ink); background: transparent; }
+}
+
+/* ---- בורר מקטעים ---- */
+.seg {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: var(--r-full);
+  background: #e2e9f0;
+}
+.seg button {
+  border: 0;
+  background: transparent;
+  border-radius: var(--r-full);
+  padding: var(--s1) var(--s3);
+  min-height: 32px;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+.seg button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--e1);
+}
+
+/* ---- כדור אטום (משותף למגש, ללוח ולכרטיסים) ---- */
+.ball {
+  --size: 44px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  font-family: var(--font-display);
+  font-size: calc(var(--size) * 0.4);
+  line-height: 1;
+  color: var(--atom-ink);
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 42%),
+    var(--atom);
+  box-shadow:
+    inset -5px -7px 12px rgba(0, 0, 0, 0.24),
+    0 3px 8px rgba(23, 38, 58, 0.18);
+}
+.ball[data-symbol="H"] { box-shadow: inset -5px -7px 12px rgba(0, 0, 0, 0.12), inset 0 0 0 1.5px #b9c4cf, 0 3px 8px rgba(23, 38, 58, 0.16); }
+
+[data-symbol="H"] { --atom: var(--atom-H); --atom-ink: var(--atom-ink-H); }
+[data-symbol="C"] { --atom: var(--atom-C); --atom-ink: var(--atom-ink-C); }
+[data-symbol="N"] { --atom: var(--atom-N); --atom-ink: var(--atom-ink-N); }
+[data-symbol="O"] { --atom: var(--atom-O); --atom-ink: var(--atom-ink-O); }
+[data-symbol="S"] { --atom: var(--atom-S); --atom-ink: var(--atom-ink-S); }
+[data-symbol="Cl"] { --atom: var(--atom-Cl); --atom-ink: var(--atom-ink-Cl); }
+
+.star {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background: var(--spark);
+  clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
