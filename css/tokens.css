@@ -1,0 +1,74 @@
+/* מערכת העיצוב המוצהרת (ראו CLAUDE.md). כל צבע, ריווח ורדיוס בקוד מגיע מכאן. */
+
+@font-face {
+  font-family: "Secular One";
+  src: url("../fonts/secular-one-hebrew.woff2") format("woff2");
+  unicode-range: U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Secular One";
+  src: url("../fonts/secular-one-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2212, U+FEFF;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Varela Round";
+  src: url("../fonts/varela-round-hebrew.woff2") format("woff2");
+  unicode-range: U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Varela Round";
+  src: url("../fonts/varela-round-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2212, U+FEFF;
+  font-display: swap;
+}
+
+:root {
+  /* צבע: ממשק */
+  --paper: #f3f6f9;        /* רקע עמוד ולוח */
+  --grid: #d6e2ec;         /* קווי משבצות – קישוט בלבד */
+  --ink: #17263a;          /* טקסט, כפתור ראשי, קשרים */
+  --ink-soft: #52637a;     /* טקסט משני (5.6:1 על paper) */
+  --surface: #ffffff;      /* פאנלים */
+  --line: #d9e1e8;         /* גבולות קישוטיים */
+  --line-strong: #7d8fa3;  /* גבולות פקדים (3.3:1) */
+  --spark: #f26b1d;        /* בחירה, פוקוס, כוכבים – לא לטקסט */
+  --good: #177a45;
+  --good-bg: #e3f4ea;
+  --bad: #b42318;
+  --bad-bg: #fdecea;
+
+  /* טיפוגרפיה: סקאלה 1.25 */
+  --font-display: "Secular One", "Arial Hebrew", "Arial", sans-serif;
+  --font-body: "Varela Round", "Arial Hebrew", "Arial", sans-serif;
+  --fs-sm: 0.875rem;  /* 14 */
+  --fs-md: 1rem;      /* 16 */
+  --fs-lg: 1.25rem;   /* 20 */
+  --fs-xl: 1.5625rem; /* 25 */
+  --fs-2xl: 1.953rem; /* 31 */
+
+  /* ריווח: בסיס 4 */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px;
+
+  /* רדיוס */
+  --r-tile: 12px;
+  --r-panel: 20px;
+  --r-full: 999px;
+
+  /* עומק: 1 = פאנל, 2 = צף */
+  --e1: 0 1px 2px rgba(23, 38, 58, 0.06);
+  --e2: 0 10px 28px rgba(23, 38, 58, 0.18);
+
+  /* תנועה */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --t-press: 120ms;
+  --t-pop: 160ms;
+  --t-ui: 220ms;
+  --t-exit: 160ms;
+
+  /* כיוון (לטרנספורמציות אופקיות) */
+  --dir: -1;
+}

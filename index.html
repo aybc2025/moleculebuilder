@@ -2,133 +2,104 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; base-uri 'self'; form-action 'none'" />
   <title>בונה המולקולות</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="משחק לבניית מולקולות לילדים" />
+  <meta name="theme-color" content="#f3f6f9" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="style.css" />
-  <meta name="theme-color" content="#f3f4f6" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="preload" href="fonts/secular-one-hebrew.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/varela-round-hebrew.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/board.css" />
+  <link rel="stylesheet" href="css/screens.css" />
 </head>
 <body>
-  <div id="app" class="app fade-in">
-    <header class="app-header">
-      <div class="app-title">בונה המולקולות</div>
-      <div class="app-subtitle">משחק חיבור אטומים לילדים</div>
-    </header>
+  <header class="topbar">
+    <span class="wordmark">בונה המולקולות</span>
+    <nav class="tabs" role="tablist" aria-label="מסכים">
+      <button class="tab" role="tab" id="tab-build" aria-controls="screen-build" aria-selected="true">בנייה</button>
+      <button class="tab" role="tab" id="tab-challenges" aria-controls="screen-challenges" aria-selected="false" tabindex="-1">אתגרים</button>
+      <button class="tab" role="tab" id="tab-atoms" aria-controls="screen-atoms" aria-selected="false" tabindex="-1">אטומים</button>
+    </nav>
+    <span class="stars" id="stars" aria-live="polite"><span class="star" aria-hidden="true"></span><span id="stars-count">0</span></span>
+  </header>
 
-    <main class="app-main">
-      <!-- פאנל צדדי: בחירת מצב -->
-      <nav class="side-panel card">
-        <h2 class="panel-title">מצבים</h2>
-        <button class="primary-btn" data-screen-target="screen-freeplay">
-          🔬 משחק חופשי
-        </button>
-        <button class="secondary-btn" data-screen-target="screen-challenges">
-          ⭐ אתגרי בנייה
-        </button>
-        <button class="secondary-btn" data-screen-target="screen-atoms">
-          🧪 למד על האטומים
-        </button>
-        <hr class="divider" />
-        <button class="ghost-btn" id="btn-check-molecule">
-          ✅ בדוק את המולקולה
-        </button>
-        <button class="ghost-btn" id="btn-reset-board">
-          🗑️ נקה לוח
-        </button>
-      </nav>
+  <main>
+    <section id="screen-build" class="screen build" role="tabpanel" aria-labelledby="tab-build">
+      <div class="tray" id="tray" aria-label="אטומים"></div>
 
-      <!-- אזור תוכן דינמי -->
-      <section class="content-area">
-        <!-- מסך משחק חופשי -->
-        <section id="screen-freeplay" class="screen active">
-          <div class="screen-header">
-            <h2>משחק חופשי</h2>
-            <p class="screen-desc">
-              גררו אטומים ללוח, הקליקו על שני אטומים כדי לחבר ביניהם, ובדקו אם בניתם מולקולה אפשרית.
-            </p>
-            <div id="active-challenge-banner" class="active-challenge-banner hidden"></div>
+      <div class="stage">
+        <div class="challenge-bar" id="challenge-bar" hidden></div>
+        <div class="board" id="board">
+          <svg class="bond-layer" id="bond-layer" aria-hidden="true"></svg>
+          <div class="atom-layer" id="atom-layer"></div>
+          <div class="board-empty" id="board-empty">
+            <span class="board-empty-atoms" aria-hidden="true">
+              <span class="ball" data-symbol="H">H</span><span class="ball" data-symbol="O">O</span><span class="ball" data-symbol="H">H</span>
+            </span>
+            <span>הקישו על אטום כדי להתחיל</span>
           </div>
+          <div class="burst" id="burst" aria-hidden="true"></div>
+        </div>
+        <div class="toolbar">
+          <button type="button" class="btn" id="btn-undo">
+            <span class="icon-flip"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></span>
+            בטל
+          </button>
+          <button type="button" class="btn" id="btn-clear">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>
+            נקה
+          </button>
+          <button type="button" class="btn btn-primary" id="btn-check">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg>
+            בדוק
+          </button>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+      </div>
 
-          <div class="workspace">
-            <!-- סרגל האטומים -->
-            <div class="atom-palette card" id="atom-palette">
-              <h3 class="panel-title">אטומים</h3>
-            </div>
-
-            <!-- לוח עבודה + SVG לקשרים -->
-            <div class="board-wrapper card">
-              <div class="board-toolbar">
-                <span>לחצו על אטום אחד ואז על אחר כדי ליצור קשר. אפשר גם לגרור אטומים על הלוח.</span>
-              </div>
-              <div class="board" id="board">
-                <svg class="bond-layer" id="bond-layer" width="100%" height="100%"></svg>
-              </div>
-            </div>
-
-            <!-- תצוגה תלת־מימדית -->
-            <div class="viewer3d card" id="viewer3d-card">
-              <div class="viewer3d-header">
-                <h3 class="panel-title">תצוגה תלת־מימדית</h3>
-                <span class="viewer3d-hint">כשתזהו או תציגו מולקולה, היא תופיע כאן.</span>
-              </div>
-              <canvas
-                id="viewer3d-canvas"
-                class="viewer3d-canvas"
-                aria-label="תצוגה תלת־מימדית של המולקולה"
-              ></canvas>
-              <div class="viewer3d-empty-hint">
-                עדיין אין מולקולה להצגה. נסו לבנות מולקולה או לבחור אחת מאתגרי הבנייה.
-              </div>
-            </div>
-
-            <!-- הודעות ומשוב -->
-            <div class="message-panel card">
-              <h3 class="panel-title">הודעות</h3>
-              <div id="message-area" class="message-area">
-                ברוך הבא! התחל בלחיצה על אחד האטומים כדי להוסיף אותו ללוח.
-              </div>
-              <div id="molecule-info" class="molecule-info hidden"></div>
-            </div>
+      <aside class="panel" id="panel" aria-label="המולקולה">
+        <button type="button" class="panel-close" id="panel-close" aria-label="סגור">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+        <div class="panel-body" id="panel-body"></div>
+        <div class="viewer" id="viewer">
+          <canvas class="viewer-canvas" id="viewer-canvas" aria-label="המולקולה בתלת־ממד"></canvas>
+          <p class="viewer-empty" id="viewer-empty">השלימו מולקולה כדי לראות אותה בתלת־ממד</p>
+          <div class="seg viewer-mode" role="group" aria-label="סוג תצוגה">
+            <button type="button" data-mode="stick" aria-pressed="true">כדור־מקל</button>
+            <button type="button" data-mode="fill" aria-pressed="false">מלא</button>
           </div>
-        </section>
+        </div>
+      </aside>
+    </section>
 
-        <!-- מסך אתגרים -->
-        <section id="screen-challenges" class="screen">
-          <div class="screen-header">
-            <h2>אתגרי בנייה ומולקולות מוכרות</h2>
-            <p class="screen-desc">
-              בחרו מולקולה: תוכלו לראות דוגמה מוכנה על הלוח, או להתחיל אתגר ולנסות לבנות אותה בעצמכם.
-            </p>
-          </div>
-          <div id="challenge-list" class="challenge-list">
-            <!-- ימולא מתוך KNOWN_MOLECULES ב-app.js -->
-          </div>
-        </section>
+    <section id="screen-challenges" class="screen" role="tabpanel" aria-labelledby="tab-challenges" hidden>
+      <div class="progress-head">
+        <span id="progress-text"></span>
+        <div class="progress" aria-hidden="true"><span id="progress-fill"></span></div>
+      </div>
+      <div id="challenge-levels"></div>
+    </section>
 
-        <!-- מסך מידע על אטומים -->
-        <section id="screen-atoms" class="screen">
-          <div class="screen-header">
-            <h2>למד על האטומים</h2>
-            <p class="screen-desc">
-              לכל אטום יש מספר "ידיים" (קשרים) שאיתן הוא יכול להחזיק אטומים אחרים.
-            </p>
-          </div>
-          <div id="atom-info-list" class="atom-info-list"></div>
-        </section>
-      </section>
-    </main>
+    <section id="screen-atoms" class="screen" role="tabpanel" aria-labelledby="tab-atoms" hidden>
+      <div class="atom-cards" id="atom-cards"></div>
+    </section>
+  </main>
+
+  <div class="update-banner" id="update-banner" hidden>
+    <span>יש גרסה חדשה</span>
+    <button type="button" id="update-reload">רענן</button>
   </div>
 
-  <!-- טעינה לוקאלית של Three.js + OrbitControls + האפליקציה -->
-  <script src="three.min.js"></script>
-  <script src="OrbitControls.js"></script>
-  <script src="app.js"></script>
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("service-worker.js").catch(() => {});
-      });
-    }
-  </script>
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/OrbitControls.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
